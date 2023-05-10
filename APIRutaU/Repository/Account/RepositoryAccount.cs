@@ -19,13 +19,72 @@ namespace APIRutaU.Repository.Account
             {
                 try
                 {
-                    return await connection.QueryAsync<dynamic>("exec sp_Login @User, @Password",
+                    return await connection.QueryAsync<dynamic>("exec sp_Login @Email, @Password",
                                                                 new
-                                                                { User = model.User, Password = model.Pass });
+                                                                { Email = model.User, Password = model.Pass });
                 }
                 catch
                 {
                     return new { Rpta = "Error en la transacción", Cod = "-1" };
+                }
+            }
+        }
+        public async Task<dynamic> ValidateUserById(ValidateUserByIdViewModel model)
+        {
+            using (var connection = new SqlConnection(connectioString))
+            {
+                try
+                {
+                    return await connection.QueryAsync<dynamic>("exec sp_ValidateUserById @User_Id", new { User_Id = model.User_Id });
+                }
+                catch
+                {
+                    return new { Rpta = "Error en la transacción", Cod = "-1" };
+                }
+            }
+        }
+        public async Task<dynamic> ValidateOTP(ValidateOTPViewModel model)
+        {
+            using (var connection = new SqlConnection(connectioString))
+            {
+                try
+                {
+                    return await connection.QueryAsync(@"exec sp_ValidateOTP @StrEmail, @StrOTP;",
+                                                        new { StrEmail = model.Email, StrOTP = model.Cod });
+                }
+                catch
+                {
+                    return JsonSerializer.Serialize("0");//Corresponde a error en la transaccion
+                }
+            }
+        }
+        public async Task<dynamic> ChangePasswordByOTP(ChangePasswordByOTPViewModel model)
+        {
+            using (var connection = new SqlConnection(connectioString))
+            {
+                try
+                {
+                    return await connection.QueryAsync(@"exec sp_ChangePasswordByOTP @User_Id, @StrPassword, @StrOTP;",
+                                                        new { User_Id = model.User_Id, StrPassword = model.Password, StrOTP = model.OTP });
+                }
+                catch
+                {
+                    return JsonSerializer.Serialize("0");//Corresponde a error en la transaccion
+                }
+            }
+        }
+        public async Task<dynamic> GetOTP(GetOTPViewModel model)
+        {
+            using (var connection = new SqlConnection(connectioString))
+            {
+                try
+                {
+                    return await connection.QueryAsync(@"exec sp_GetOtpByUser @Email;",
+                                                        new { Email = model.Email });
+                }
+                catch
+                {
+                    return JsonSerializer.Serialize("0");//Corresponde a error en la transaccion
                 }
             }
         }
