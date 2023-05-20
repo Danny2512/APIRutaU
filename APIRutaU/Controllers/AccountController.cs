@@ -28,7 +28,6 @@ namespace APIRutaU.Controllers
         {
             var peticion = await _repository.Login(model);
             var response = peticion[0]; //Obtengo el primer elemento de la respuesta
-            var pp = _Token.ValidateToken(_Token.CreateToken(new[] { new Claim("User_Id", response.Id.ToString()) }, TimeSpan.FromMinutes(30)));
             if (response.Id != null) // Si la validación fue exitosa, genero un token y lo envío en la respuesta
             {
                 return Ok(new
@@ -42,7 +41,7 @@ namespace APIRutaU.Controllers
                 return Ok(new
                 {
                     Rpta = response.Rpta,
-                    Cod = response.Cod
+                    Codigo = response.Codigo
                 });
             }
         }
@@ -73,7 +72,7 @@ namespace APIRutaU.Controllers
                 return Ok(new
                 {
                     Rpta = response.Rpta,
-                    Cod = response.Cod
+                    Codigo = response.Codigo
                 });
             }
         }
@@ -82,7 +81,7 @@ namespace APIRutaU.Controllers
         {
             var peticion = await _repository.GetOTP(model);
             var response = peticion[0];
-            if (response.Cod != "-1")
+            if (response.Codigo != "-1")
             {
                 return Ok(await _Mail.SendMail(new string[] { response.Email }, new string[] { }, "Recuperación de contraseña", $"Este es un correo electrónico de prueba y este es tu código{response.Rpta}"));
             }
@@ -91,7 +90,7 @@ namespace APIRutaU.Controllers
                 return Ok(new
                 {
                     Rpta = response.Rpta,
-                    Cod = response.Cod
+                    Codigo = response.Codigo   
                 });
             }
         }
@@ -103,7 +102,7 @@ namespace APIRutaU.Controllers
             return Ok(new
             {
                 Rpta = response.Rpta,
-                Cod = response.Cod
+                Codigo = response.Codigo
             });
         }
         [HttpPost]
@@ -111,17 +110,29 @@ namespace APIRutaU.Controllers
         {
             var peticion = await _repository.ChangePasswordByOTP(model);
             var response = peticion[0];
-            var user = new
+
+            if (response.Codigo != "-1")
             {
-                Name = response.StrName,
-                Token = _Token.CreateToken(new[] { new Claim("User_Id", response.Id.ToString()) }, TimeSpan.FromMinutes(30))
-            };
-            return Ok(new
+                var user = new
+                {
+                    Name = response.StrName,
+                    Token = _Token.CreateToken(new[] { new Claim("User_Id", response.Id.ToString()) }, TimeSpan.FromMinutes(30))
+                };
+                return Ok(new
+                {
+                    Rpta = response.Rpta,
+                    Codigo = response.Codigo,
+                    User = user
+                });
+            }
+            else
             {
-                Rpta = response.Rpta,
-                Cod = response.Cod,
-                User = user
-            });
+                return Ok(new
+                {
+                    Rpta = response.Rpta,
+                    Codigo = response.Codigo
+                });
+            }
         }
     }
 }

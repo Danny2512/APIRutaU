@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using APIRutaU.Helpers.Token;
 using APIRutaU.Helpers.Mail;
 using APIRutaU.Repository.Account;
+using APIRutaU.Repository.Route;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddTransient<IRepositoryAccount, RepositoryAccount>();
+builder.Services.AddTransient<IRepositoryRoute, RepositoryRoute>();
 builder.Services.AddTransient<IMailHelper, MailHelper>();
 builder.Services.AddTransient<ITokenHelper, TokenHelper>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -76,6 +78,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
